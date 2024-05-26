@@ -1,5 +1,4 @@
 import { AuthContextProvider } from "@/context/auth-context";
-import { useAuthContext } from "@/hook/use-auth-context";
 
 interface IProviderProps {
   children: React.ReactNode

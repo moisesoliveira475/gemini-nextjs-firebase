@@ -1,18 +1,17 @@
 "use client";
 
-import { auth, provider } from "@/services/firebase";
-import { OAuthProvider, User, onAuthStateChanged, signInWithPopup } from "firebase/auth";
+import { auth, provider } from "@/lib/firebase/auth";
+import { User, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 
 interface IAuthContextProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode,
 }
 
 interface IAuthContext {
   handleSignIn: () => Promise<void>,
-  listenUser: () => void,
   handleLogout: () => Promise<void>,
   user: User | null
 }
@@ -33,28 +32,35 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
       })
       .catch((error) => {
         // Handle error.
-        console.log(error)
+        console.log('Sign-in error:', error)
       });
   }
 
   async function handleLogout() {
-    if(user !== null) {
+    if (user) {
+      auth.signOut()
       setUser(null)
     }
-    console.log("Usuário não está logado")
   }
 
-  function listenUser() {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-      } else {
-        setUser(null)
-      }
-    });
-}
-    return (
-      <AuthContext.Provider value={{ handleSignIn, listenUser, handleLogout, user }}>
-        {children}
-      </AuthContext.Provider>
-    )
+  function listenFirebaseUserAuth() {
+    useEffect(() => {
+      const unsubscrive = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(user);
+        }
+      });
+      return () => unsubscrive();
+    }, [user])
+
+    return user
   }
+
+  listenFirebaseUserAuth()
+
+  return (
+    <AuthContext.Provider value={{ handleSignIn, handleLogout, user }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
