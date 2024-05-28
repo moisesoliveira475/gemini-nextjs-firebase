@@ -1,6 +1,7 @@
 "use client";
 
 import { auth, provider } from "@/lib/firebase/auth";
+import { setFirebaseUser } from "@/lib/firebase/firestore";
 import { User, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
@@ -27,8 +28,15 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
   async function handleSignIn() {
     await signInWithPopup(auth, provider)
       .then((result) => {
-        setUser(result.user)
-        router.push('/')
+        const user = result.user
+
+        if(user) {
+          setFirebaseUser(user)
+          setUser(user)
+          router.push('/home')
+        }
+        console.log(result.user)
+
       })
       .catch((error) => {
         // Handle error.
@@ -38,8 +46,11 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
 
   async function handleLogout() {
     if (user) {
-      auth.signOut()
-      setUser(null)
+      await auth.signOut()
+      .then(() => {
+        setUser(null)
+        user.refreshToken
+      })
     }
   }
 

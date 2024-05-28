@@ -6,13 +6,25 @@ import Image from "next/image";
 import logo from "@/assets/logo-oba.png"
 import { Suspense, useEffect } from "react";
 import { Loading } from "./loading";
+import { useAuthContext } from "@/hook/use-auth-context";
+import { getFirebaseUsers } from "@/lib/firebase/firestore";
 
 export function SideBar() {
 
-  useEffect(() => {
+  const { user } = useAuthContext()
 
+/*   async function handleGetChats() {
+    if(user) {
+      const docsRef = await getFirebaseUsers(user)
+      console.log(docsRef.docs)
+    }
+  }
+
+  if (user) {
+    useEffect(() => {
+      handleGetChats()
   }, [])
-
+  } */
 
   return (
     <aside className="flex flex-col w-64 bg-zinc-900 p-6 border-r border-lime-400">

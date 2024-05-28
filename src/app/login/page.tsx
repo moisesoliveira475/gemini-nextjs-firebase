@@ -18,7 +18,7 @@ export default function Login() {
 				<Button onClick={handleLogout}>
 					Logout
 				</Button>
-				<Link href='/'>
+				<Link href='/home'>
           <button className="absolute top-5 right-10 border border-gray-600 rounded-lg p-2">
             Home
           </button>
