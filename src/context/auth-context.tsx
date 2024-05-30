@@ -6,7 +6,6 @@ import { User, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
 
-
 interface IAuthContextProviderProps {
   children: React.ReactNode,
 }
@@ -23,6 +22,18 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
 
   const [user, setUser] = useState<User | null>(null);
 
+  useEffect(() => {
+    const unsubscrive = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        console.log("usuário logado", user)
+      } else {
+        console.log("usuario deslogado", user)
+      }
+    });
+    return () => unsubscrive();
+  }, [user])
+
   const router = useRouter()
 
   async function handleSignIn() {
@@ -35,8 +46,6 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
           setUser(user)
           router.push('/home')
         }
-        console.log(result.user)
-
       })
       .catch((error) => {
         // Handle error.
@@ -53,21 +62,6 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
       })
     }
   }
-
-  function listenFirebaseUserAuth() {
-    useEffect(() => {
-      const unsubscrive = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setUser(user);
-        }
-      });
-      return () => unsubscrive();
-    }, [user])
-
-    return user
-  }
-
-  listenFirebaseUserAuth()
 
   return (
     <AuthContext.Provider value={{ handleSignIn, handleLogout, user }}>

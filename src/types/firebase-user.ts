@@ -4,5 +4,5 @@ export interface IFirebaseUser {
   name: string,
   createdAT: Timestamp,
   id: string,
-  lastLogin?: Timestamp
+  lastLogin: Timestamp
 }

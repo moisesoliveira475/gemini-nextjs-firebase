@@ -7,7 +7,7 @@ import logo from "@/assets/logo-oba.png"
 import { Suspense, useEffect } from "react";
 import { Loading } from "./loading";
 import { useAuthContext } from "@/hook/use-auth-context";
-import { getFirebaseUsers } from "@/lib/firebase/firestore";
+import { handleVertexAITextFromText } from "@/lib/firebase/vertex-ai";
 
 export function SideBar() {
 
