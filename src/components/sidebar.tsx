@@ -3,7 +3,7 @@
 import { CircleHelpIcon, HomeIcon, SettingsIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/assets/logo-oba.png"
+import logo from "@/../public/logo-oba.png"
 import { Suspense, useEffect } from "react";
 import { Loading } from "./loading";
 import { useAuthContext } from "@/hook/use-auth-context";

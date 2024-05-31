@@ -26,10 +26,8 @@ export async function setFirebaseUser(user: User) {
     }
   })
   
-
   return user
 }
-
 
 function convertUserToFirebaseUser(user: User) {
   const userData: IFirebaseUser = {

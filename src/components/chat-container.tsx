@@ -1,6 +1,6 @@
 "use client"
 
-import logo from "@/assets/logo-oba.png";
+import logo from "@/../public/logo-oba.png";
 import { createChatHistory } from "@/lib/firebase/firestore";
 import { handleVertexAITextFromText } from "@/lib/firebase/vertex-ai";
 import { SendHorizonalIcon } from "lucide-react";
