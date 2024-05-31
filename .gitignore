@@ -39,5 +39,3 @@ next-env.d.ts
 .vscode
 lib/firebase/config.js
 .firebase
-
-*yaml
