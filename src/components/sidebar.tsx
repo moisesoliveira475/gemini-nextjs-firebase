@@ -1,30 +1,34 @@
 "use client"
 
-import { CircleHelpIcon, HomeIcon, SettingsIcon } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
-import logo from "@/../public/logo-oba.png"
-import { Suspense, useEffect } from "react";
-import { Loading } from "./loading";
+import logo from "@/../public/logo-oba.png";
 import { useAuthContext } from "@/hook/use-auth-context";
-import { handleVertexAITextFromText } from "@/lib/firebase/vertex-ai";
+import { IChat, getChats } from "@/lib/firebase/firestore";
+import { User } from "firebase/auth";
+import { CircleHelpIcon, HomeIcon, SettingsIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import { Loading } from "./loading";
+import { ChatHistoryList } from "./chat-history-lits";
+import { NavButtons } from "./nav-buttons";
 
 export function SideBar() {
 
+  const [chats, setChats] = useState<IChat[]>([])
+
   const { user } = useAuthContext()
 
-/*   async function handleGetChats() {
-    if(user) {
-      const docsRef = await getFirebaseUsers(user)
-      console.log(docsRef.docs)
-    }
+  async function handleGetChats(user: User) {
+    const chats = await getChats(user)
+    setChats(chats)
   }
 
   if (user) {
     useEffect(() => {
-      handleGetChats()
-  }, [])
-  } */
+      handleGetChats(user)
+    }, [])
+  }
+
 
   return (
     <aside className="flex flex-col w-64 bg-zinc-900 p-6 border-r border-lime-400">
@@ -35,27 +39,10 @@ export function SideBar() {
       </div>
       <div className="flex flex-1 w-full">
         <Suspense fallback={<Loading />}>
-          <ul>
-            <li>chat 1</li>
-            <li>chat 2</li>
-            <li>chat 3</li>
-            <li>chat 4</li>
-            <li>chat 5</li>
-            <li>chat 6</li>
-          </ul>
+          <ChatHistoryList chats={chats}/>
         </Suspense>
       </div>
-      <div className="flex mb-auto justify-between pl-3 pr-3">
-        <Link href="/">
-          <HomeIcon className="text-lime-400 hover:text-lime-400/30" />
-        </Link>
-        <button>
-          <SettingsIcon className="text-lime-400 hover:text-lime-400/30" />
-        </button>
-        <button>
-          <CircleHelpIcon className="text-lime-400 hover:text-lime-400/30" />
-        </button>
-      </div>
+      <NavButtons className="flex mb-auto justify-between pl-3 pr-3" />
     </aside>
   )
 }

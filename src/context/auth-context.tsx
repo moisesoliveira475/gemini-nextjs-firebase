@@ -26,10 +26,10 @@ export function AuthContextProvider({ children }: IAuthContextProviderProps) {
     const unsubscrive = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
-        console.log("usuário logado", user)
-      } else {
+        // console.log("usuário logado", user)
+      } /* else {
         console.log("usuario deslogado", user)
-      }
+      } */
     });
     return () => unsubscrive();
   }, [user])

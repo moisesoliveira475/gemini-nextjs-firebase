@@ -1,17 +1,36 @@
-import { User } from "firebase/auth";
-import { Timestamp, collection, getDocs, getFirestore, setDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { app } from "./app";
 import { IFirebaseUser } from "@/types/firebase-user";
-import { GenerateContentStreamResult } from "firebase/vertexai-preview";
+import { User } from "firebase/auth";
+import { Timestamp, addDoc, collection, connectFirestoreEmulator, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { app } from "./app";
 
 const db = getFirestore(app);
 
-export async function getChats() {
+connectFirestoreEmulator(db, '127.0.0.1', 8080)
+
+export interface IChat {
+  id: string,
+  owner: string,
+  response: string
+}
+
+export async function getChats(user: User) {
   const collectionRef = collection(db, "chats")
 
-  const result = await getDocs(collectionRef);
+  const q = query(collectionRef, where("data.owner", "==", user.uid))
 
-  return result.docs
+  const querySnapshot = await getDocs(q);
+
+  const documents: IChat[] = []
+
+  querySnapshot.forEach((doc) => {
+    documents.push({
+      id: doc.id,
+      owner: doc.get('data.owner'),
+      response: doc.get('data.response')
+    })
+  })
+
+  return documents
 };
 
 export async function setFirebaseUser(user: User) {
@@ -46,9 +65,16 @@ export async function getFirebaseUsers(user: User) {
   return docs
 }
 
-export async function createChatHistory(streamResult: GenerateContentStreamResult) {
-  
-  const response = streamResult.response
+export async function createChatHistory(text: string, user: User) {
+  const response = text;
 
-  console.log(response)
+  const collectionRef = collection(db, "chats")
+
+  const data = {
+    response,
+    owner: user.uid
+  }
+  await addDoc(collectionRef, {
+    data
+  })
 }

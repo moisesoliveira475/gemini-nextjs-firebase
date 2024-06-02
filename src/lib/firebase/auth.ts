@@ -1,4 +1,4 @@
-import { OAuthProvider, getAuth } from "firebase/auth";
+import { OAuthProvider, getAuth, connectAuthEmulator } from "firebase/auth";
 import { app } from "./app";
 
 const auth = getAuth(app);
@@ -11,5 +11,7 @@ provider.setCustomParameters({
   tenant,
   persistence: 'SESSION',
 });
+
+/* connectAuthEmulator(auth, 'http://127.0.0.1:4000') */
 
 export { auth, provider };

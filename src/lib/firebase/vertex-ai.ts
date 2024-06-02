@@ -1,23 +1,29 @@
+import { User } from "firebase/auth";
 import { getGenerativeModel, getVertexAI } from "firebase/vertexai-preview";
 import { app } from "./app";
 
 
 const vertexAI = getVertexAI(app);
-const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash-preview-0514" });
+export const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash-preview-0514" });
 
-export async function handleVertexAITextFromText(prompt: string) {
+export async function handleVertexAITextFromText(prompt: string, user: User) {
+	const result = await model.generateContent(prompt)
 
-    const { totalTokens, totalBillableCharacters } = await model.countTokens(prompt);
-    console.log(`Total tokens: ${totalTokens}, total billable characters: ${totalBillableCharacters}`);
+	const response = result.response
+	const text = response.text()
 
-    const result = await model.generateContentStream(prompt);
-  
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-/*       console.log(chunkText); */
-    }
+	return text
+}
 
-/*     console.log('aggregated response: ', await result.response); */
+export async function handleVertexAITextFromTextStream(prompt: string, user: User) {
+	const result = await model.generateContentStream(prompt);
 
-    return result
+	const streamArray: string[] = []
+
+	for await (const chunk of result.stream) {
+		const chunkText = chunk.text();
+		streamArray.push(chunkText)
+	}
+
+	return streamArray
 }
