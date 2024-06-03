@@ -6,17 +6,17 @@ interface INavProps extends ComponentProps<'nav'> {
 
 }
 
-export function NavButtons(props: INavProps) {
+export function NavSideBarBottom(props: INavProps) {
   return (
     <nav {...props}>
       <Link href="/">
-        <HomeIcon className="text-lime-400 hover:text-lime-400/30" />
+        <HomeIcon className="h-6 w-6 text-lime-400 hover:text-lime-400/30" />
       </Link>
       <button>
-        <SettingsIcon className="text-lime-400 hover:text-lime-400/30" />
+        <SettingsIcon className="h-6 w-6 text-lime-400 hover:text-lime-400/30" />
       </button>
       <button>
-        <CircleHelpIcon className="text-lime-400 hover:text-lime-400/30" />
+        <CircleHelpIcon className="h-6 w-6 text-lime-400 hover:text-lime-400/30" />
       </button>
     </nav>
   )

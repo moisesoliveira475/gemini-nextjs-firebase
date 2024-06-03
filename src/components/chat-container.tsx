@@ -2,20 +2,23 @@
 
 import logo from "@/../public/logo-oba.png";
 import { useAuthContext } from "@/hook/use-auth-context";
+import { useVertexAIContext } from "@/hook/use-vertexai-context";
 import { createChatHistory } from "@/lib/firebase/firestore";
-import { handleVertexAITextFromText, handleVertexAITextFromTextStream, model } from "@/lib/firebase/vertex-ai";
+import { handleVertexAITextFromText, model } from "@/lib/firebase/vertex-ai";
 import { SendHorizonalIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
+import { ChatResponseContainer } from "./chat-response-container";
 
 
 export function ChatContainer() {
-  const [prompt, setPrompt] = useState<string>("")
   const [tokens, setTokens ] = useState<number>(0)
   const [billableCharacters, setBillableCharacters ] = useState<number | undefined>(0)
+  const [response, setResponse] = useState<string>("")
   
   const { user } = useAuthContext()
+  const { prompt, setPrompt } = useVertexAIContext()
 
   useEffect(() => {
     countTokens()
@@ -36,8 +39,8 @@ export function ChatContainer() {
   async function getPromptFromInput() {
     if(user) {
       const response = await handleVertexAITextFromText(prompt, user)
-      const responseStream = await handleVertexAITextFromTextStream(prompt, user)
-      createChatHistory(response, user)
+      createChatHistory(user)
+      setResponse(response.text)
       setPrompt("");
     } else {
       console.log("Usuário precisa se autenticar")
@@ -57,7 +60,7 @@ export function ChatContainer() {
       </Link>
       <div className="flex flex-col h-full items-center justify-center">
         <div className="flex h-full w-4/5 flex-1 items-center justify-center">
-          chat-container
+          {response ? (<ChatResponseContainer message={response} />) : (null)}
         </div>
         <div className="flex w-4/5 items-center gap-2">
           <div className="flex flex-1 flex-end
