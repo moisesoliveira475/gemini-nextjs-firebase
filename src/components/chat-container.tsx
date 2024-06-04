@@ -3,20 +3,21 @@
 import logo from "@/../public/logo-oba.png";
 import { useAuthContext } from "@/hook/use-auth-context";
 import { useVertexAIContext } from "@/hook/use-vertexai-context";
-import { createChatHistory } from "@/lib/firebase/firestore";
+import { UpdateChatToChatHistory, createChatHistory } from "@/lib/firebase/firestore";
 import { handleVertexAITextFromText, model } from "@/lib/firebase/vertex-ai";
 import { SendHorizonalIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ChatResponseContainer } from "./chat-response-container";
+import { IAddChatToChatHistoryProps } from "@/types/chats";
 
 
 export function ChatContainer() {
-  const [tokens, setTokens ] = useState<number>(0)
-  const [billableCharacters, setBillableCharacters ] = useState<number | undefined>(0)
+  const [tokens, setTokens] = useState<number>(0)
+  const [billableCharacters, setBillableCharacters] = useState<number | undefined>(0)
   const [response, setResponse] = useState<string>("")
-  
+
   const { user } = useAuthContext()
   const { prompt, setPrompt } = useVertexAIContext()
 
@@ -29,17 +30,25 @@ export function ChatContainer() {
   }
 
   async function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement> | undefined) {
-    if(event) {
-      if(event.key === "Enter") {
+    if (event) {
+      if (event.key === "Enter") {
         getPromptFromInput()
       }
     }
   }
 
   async function getPromptFromInput() {
-    if(user) {
+    if (user) {
       const response = await handleVertexAITextFromText(prompt, user)
-      createChatHistory(user)
+      const docRef = await createChatHistory(user)
+      const chatToCreate: IAddChatToChatHistoryProps = {
+        docRef,
+        prompt,
+        user,
+        role: "user",
+        subject: response.subject
+      }
+      UpdateChatToChatHistory(chatToCreate)
       setResponse(response.text)
       setPrompt("");
     } else {
@@ -74,7 +83,7 @@ export function ChatContainer() {
               onKeyDown={handleKeyDown}
             />
             <button className="h-8 w-8 mr-3 border rounded-full border-lime-400 text-lime-400 hover:text-lime-400/30" onClick={getPromptFromInput}>
-              <SendHorizonalIcon className="w-6 h-6 pl-1" />
+              <SendHorizonalIcon className="w-6 h-6 ml-[0.25rem]" />
             </button>
           </div>
           <div className="h-18 w-44 text-sm border border-lime-500 p-1 rounded-lg">

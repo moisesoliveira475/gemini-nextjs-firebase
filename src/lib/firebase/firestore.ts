@@ -1,4 +1,4 @@
-import { IChat } from "@/types/chats";
+import { IAddChatToChatHistoryProps, IChat } from "@/types/chats";
 import { IFirebaseUser } from "@/types/firebase-user";
 import { User } from "firebase/auth";
 import { DocumentReference, Timestamp, addDoc, collection, connectFirestoreEmulator, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
@@ -33,7 +33,7 @@ connectFirestoreEmulator(db, '127.0.0.1', 8080)
 export async function setFirebaseUser(user: User) {
   const userData = convertUserToFirebaseUser(user)
   await getDoc(doc(db, "users", user.uid)).then(async response => {
-    if(response.exists()) {
+    if (response.exists()) {
       await updateDoc(doc(db, "users", user.uid), {
         lastLogin: Timestamp.now()
       });
@@ -41,7 +41,7 @@ export async function setFirebaseUser(user: User) {
       await setDoc(doc(db, "users", user.uid), userData)
     }
   })
-  
+
   return user
 }
 
@@ -77,30 +77,15 @@ function convertUserToFirebaseUser(user: User) {
   })
 } */
 
-export async function createChatHistory(user: User) {
+export async function getChatHistory(user: User, docRef: DocumentReference) {
 
-  const collectionRef = collection(db, "chats")
+  const querySnapshot = await getDoc(docRef)
 
-  const data = {
-    owner: user.uid,
-    response: [
-      {
-        role: "user",
-        parts: [
-          {text: ""}
-        ]
-      }
-    ],
-    subject: ""
-  }
+  if (user.uid === querySnapshot.get('owner')) {
+    return querySnapshot
+  } 
 
-  await addDoc(collectionRef, data)
-  .then((res) => {
-    return res
-  })
-  .catch((err) => {
-    console.log(err)
-  })
+  throw new Error('Usuário não é dono do chat que está tentando recuperar')
 }
 
 export async function getChatsHistory(user: User) {
@@ -125,14 +110,52 @@ export async function getChatsHistory(user: User) {
   return documents
 }
 
-export async function getChatHistory(user: User, docRef: DocumentReference) {
+export async function createChatHistory(user: User) {
 
-  const querySnapshot = await getDoc(docRef)
+  const collectionRef = collection(db, "chats")
 
-  if( user.uid === querySnapshot.get('owner')) {
-    return querySnapshot
-  } else {
-    throw new Error('Usuário não é dono do chat que está tentando recuperar')
+  const data = {
+    owner: user.uid,
+    response: [
+      {
+        role: "user",
+        parts: [
+          { text: "" }
+        ]
+      }
+    ],
+    subject: ""
   }
 
+  const docRef = await addDoc(collectionRef, data)
+
+  return docRef
+
 }
+
+export async function UpdateChatToChatHistory(props : IAddChatToChatHistoryProps) {
+
+  const { docRef, prompt, role, subject, user } = props;
+
+  const doc = await getChatHistory(user, docRef)
+
+  if(doc.exists()) {
+    updateDoc(docRef, {
+      
+    })
+  }
+
+  updateDoc(docRef, {
+    owner: user.uid,
+    response: [
+      {
+        parts: [{
+          text: prompt
+        }],
+        role
+      }
+    ],
+    subject
+  })
+}
+
