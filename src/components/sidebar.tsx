@@ -12,7 +12,7 @@ import { NavSideBarTop } from "./nav-sidebar-top";
 
 export function SideBar() {
 
-  const [chats, setChats] = useState<IChat[]>([])
+  const [chats, setChats] = useState<IChat[]>([] as IChat[])
 
   const { user } = useAuthContext()
 

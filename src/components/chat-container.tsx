@@ -3,23 +3,22 @@
 import logo from "@/../public/logo-oba.png";
 import { useAuthContext } from "@/hook/use-auth-context";
 import { useVertexAIContext } from "@/hook/use-vertexai-context";
-import { UpdateChatToChatHistory, createChatHistory } from "@/lib/firebase/firestore";
-import { handleVertexAITextFromText, model } from "@/lib/firebase/vertex-ai";
+import { UpdateChatToChatHistory, createChatHistory, getChatHistory } from "@/lib/firebase/firestore";
+import { handleVertexAIChat, model } from "@/lib/firebase/vertex-ai";
 import { SendHorizonalIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ChatResponseContainer } from "./chat-response-container";
-import { IAddChatToChatHistoryProps } from "@/types/chats";
+import { IChat } from "@/types/chats";
 
 
 export function ChatContainer() {
   const [tokens, setTokens] = useState<number>(0)
   const [billableCharacters, setBillableCharacters] = useState<number | undefined>(0)
-  const [response, setResponse] = useState<string>("")
 
   const { user } = useAuthContext()
-  const { prompt, setPrompt } = useVertexAIContext()
+  const { prompt, setPrompt, chat, setChat } = useVertexAIContext()
 
   useEffect(() => {
     countTokens()
@@ -39,17 +38,29 @@ export function ChatContainer() {
 
   async function getPromptFromInput() {
     if (user) {
-      const response = await handleVertexAITextFromText(prompt, user)
+      debugger
+      const response = await handleVertexAIChat(prompt, user)
       const docRef = await createChatHistory(user)
-      const chatToCreate: IAddChatToChatHistoryProps = {
-        docRef,
-        prompt,
-        user,
-        role: "user",
-        subject: response.subject
-      }
-      UpdateChatToChatHistory(chatToCreate)
-      setResponse(response.text)
+      const doc = await getChatHistory(user, docRef)
+      setChat({
+        documentRef: docRef,
+        id: doc.id,
+        owner: user,
+        subject: response.subject,
+        history: [{
+          role: "user",
+          parts: [
+            {text: prompt}
+          ]
+        },
+        {
+          role: "model",
+          parts: [
+            {text: response.text}
+          ]
+        }]
+      })
+      UpdateChatToChatHistory(chat)
       setPrompt("");
     } else {
       console.log("Usuário precisa se autenticar")
@@ -69,7 +80,7 @@ export function ChatContainer() {
       </Link>
       <div className="flex flex-col h-full items-center justify-center">
         <div className="flex h-full w-4/5 flex-1 items-center justify-center">
-          {response ? (<ChatResponseContainer message={response} />) : (null)}
+          ChatMessageContainer                    
         </div>
         <div className="flex w-4/5 items-center gap-2">
           <div className="flex flex-1 flex-end

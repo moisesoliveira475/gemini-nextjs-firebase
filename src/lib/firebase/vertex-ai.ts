@@ -27,7 +27,7 @@ const vertexAI = getVertexAI(app);
 
 export const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash-preview-0514" });
 
-export async function handleVertexAITextFromText(prompt: string, user: User) {
+/* export async function handleVertexAITextFromText(prompt: string, user: User) {
 	const result = await model.generateContent(prompt)
   const subject = (await model.generateContent("Gere um assunto de até 5 palavras com base nesse prompt para ser mostrado no histórico de prompts enviados por usuários da minha aplicação: ".concat(prompt))).response.text()
 
@@ -52,20 +52,10 @@ export async function handleVertexAITextFromTextStream(prompt: string, user: Use
 		streamArray.push(chunkText)
 	}
   return streamArray;
-}
+} */
 
 export async function handleVertexAIChat(prompt: string, user: User) {
-  const chat = model.startChat({
-    history: [
-      {
-        role: "user",
-        parts: [{text: "Oi, eu tenho dois cachorros"}]
-      }
-    ],
-    generationConfig: {
-      maxOutputTokens: 100,
-    }
-  });
+  const chat = model.startChat();
 
   const subject = (await model.generateContent("Gere um assunto de até 5 palavras com base nesse prompt para ser mostrado no histórico de prompts enviados por usuários da minha aplicação: ".concat(prompt))).response.text()
 

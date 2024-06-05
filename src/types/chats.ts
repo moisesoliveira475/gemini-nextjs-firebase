@@ -3,26 +3,17 @@ import { DocumentReference } from "firebase/firestore"
 
 export interface IChat {
   id: string,
-  owner: string,
-  response: IChatResponse[]
+  owner: User,
+  history: IChatHistory[]
   subject: string
   documentRef: DocumentReference
 }
 
-interface IChatResponse {
+export interface IChatHistory {
   role: string,
-  parts: IChatResponseParts[]
+  parts: IChatHistoryParts[]
 }
 
-interface IChatResponseParts {
+interface IChatHistoryParts {
   text: string
-}
-
-/* Interface das informações necessárias para adicionar um chat no firebase */
-export interface IAddChatToChatHistoryProps {
-  user: User,
-  docRef: DocumentReference,
-  prompt: string,
-  role: string,
-  subject: string
 }

@@ -1,8 +1,9 @@
-import { IAddChatToChatHistoryProps, IChat } from "@/types/chats";
+import { IChat, IChatHistory } from "@/types/chats";
 import { IFirebaseUser } from "@/types/firebase-user";
 import { User } from "firebase/auth";
-import { DocumentReference, Timestamp, addDoc, collection, connectFirestoreEmulator, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { DocumentReference, Timestamp, addDoc, arrayUnion, collection, connectFirestoreEmulator, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { app } from "./app";
+
 
 const db = getFirestore(app);
 
@@ -83,7 +84,7 @@ export async function getChatHistory(user: User, docRef: DocumentReference) {
 
   if (user.uid === querySnapshot.get('owner')) {
     return querySnapshot
-  } 
+  }
 
   throw new Error('Usuário não é dono do chat que está tentando recuperar')
 }
@@ -101,7 +102,7 @@ export async function getChatsHistory(user: User) {
     documents.push({
       id: doc.id,
       owner: doc.get('owner'),
-      response: doc.get('response'),
+      history: doc.get('history'),
       subject: doc.get('subject'),
       documentRef: doc.ref
     })
@@ -116,46 +117,28 @@ export async function createChatHistory(user: User) {
 
   const data = {
     owner: user.uid,
-    response: [
-      {
-        role: "user",
-        parts: [
-          { text: "" }
-        ]
-      }
-    ],
-    subject: ""
+    subject: "",
+    history: []
   }
 
   const docRef = await addDoc(collectionRef, data)
 
   return docRef
-
 }
 
-export async function UpdateChatToChatHistory(props : IAddChatToChatHistoryProps) {
+export async function UpdateChatToChatHistory(props: IChat) {
 
-  const { docRef, prompt, role, subject, user } = props;
+  const { documentRef, history, subject, owner } = props;
 
-  const doc = await getChatHistory(user, docRef)
+  const doc = await getChatHistory(owner, documentRef);
 
-  if(doc.exists()) {
-    updateDoc(docRef, {
-      
-    })
+  if (doc.exists()) {
+    const docUpdated = await updateDoc(documentRef, {
+      history: arrayUnion(history),
+      subject
+    }
+    )
+    return docUpdated
   }
-
-  updateDoc(docRef, {
-    owner: user.uid,
-    response: [
-      {
-        parts: [{
-          text: prompt
-        }],
-        role
-      }
-    ],
-    subject
-  })
+  return doc
 }
-
